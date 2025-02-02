@@ -1,8 +1,6 @@
 from typing import Any, Dict, List
-
 import yaml
 from pydantic import BaseModel
-
 
 class ProjectConfig(BaseModel):
     num_features: List[str]
