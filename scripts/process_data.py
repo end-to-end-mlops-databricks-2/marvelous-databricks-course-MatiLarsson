@@ -1,8 +1,8 @@
 # Databricks notebook source
 import yaml
-from house_price.data_processor import DataProcessor
-from house_price.price_model import PriceModel
+
 from house_price.config import ProjectConfig
+from house_price.data_processor import DataProcessor
 
 # Load configuration
 config = ProjectConfig.from_yaml(config_path="../../project_config.yml")
@@ -25,4 +25,3 @@ print("Training set shape:", X_train.shape)
 print("Test set shape:", X_test.shape)
 
 data_processor.save_to_catalog(X_train, X_test)
-

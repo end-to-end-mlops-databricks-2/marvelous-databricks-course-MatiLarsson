@@ -10,9 +10,10 @@
 
 # COMMAND ----------
 
-import pandas as pd
 import datetime
-import yaml 
+
+import pandas as pd
+import yaml
 from sklearn.model_selection import train_test_split
 
 # COMMAND ----------
@@ -70,7 +71,7 @@ df.fillna(
 # Convert categorical features to the appropriate type
 cat_features = config.cat_features
 for cat_col in cat_features:
-     df[cat_col] = df[cat_col].astype("category")
+    df[cat_col] = df[cat_col].astype("category")
 
 # Extract target and relevant features
 target = config.target

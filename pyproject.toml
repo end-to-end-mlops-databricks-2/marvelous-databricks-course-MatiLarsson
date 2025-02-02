@@ -31,12 +31,13 @@ requires = [
   "setuptools>=72.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where =["src"]
-include = ["house_price*"]
-
 [tool.ruff]
 line-length = 120
+exclude = [
+    "notebooks/*.py",  # Excludes Databricks notebooks that contain special syntax
+]
+
+[tool.ruff.lint]
 select = [
     "F",  # pyflakes rules
     "E",  # pycodestyle error rules
