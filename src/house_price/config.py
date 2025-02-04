@@ -11,7 +11,7 @@ class ProjectConfig(BaseModel):
     catalog_name: str
     schema_name: str
     parameters: Dict[str, Any]  # Dictionary to hold model-related parameters
-    
+
     @classmethod
     def from_yaml(cls, config_path: str):
         """Load configuration from a YAML file."""

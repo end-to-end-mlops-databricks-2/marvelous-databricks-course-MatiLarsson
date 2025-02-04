@@ -54,4 +54,3 @@ logger.info("Training set shape: %s", X_train.shape)
 logger.info("Test set shape: %s", X_test.shape)
 
 data_processor.save_to_catalog(X_train, X_test, spark)
-

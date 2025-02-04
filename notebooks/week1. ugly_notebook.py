@@ -12,7 +12,7 @@
 
 import pandas as pd
 import datetime
-import yaml 
+import yaml
 from sklearn.model_selection import train_test_split
 
 # COMMAND ----------
