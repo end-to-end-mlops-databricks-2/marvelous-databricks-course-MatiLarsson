@@ -1,4 +1,4 @@
-catalog_name: mlops_prod
+catalog_name: mlops_dev
 schema_name: house_prices
 experiment_name_basic: /Shared/house-prices-basic
 experiment_name_custom: /Shared/house-prices-custom

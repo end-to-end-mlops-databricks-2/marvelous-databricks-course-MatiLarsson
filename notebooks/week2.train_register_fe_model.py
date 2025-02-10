@@ -1,21 +1,28 @@
 # Databricks notebook source
+# MAGIC %pip install /Volumes/mlops_dev/house_prices/package/house_price-0.0.1-py3-none-any.whl
+
+# COMMAND ----------
+
+# MAGIC %restart_python
+
+# COMMAND ----------
 import mlflow
 from loguru import logger
 from pyspark.sql import SparkSession
 
 from house_price.config import ProjectConfig, Tags
-from house_price.feature_lookup_model import FeatureLookUpModel
+from house_price.models.feature_lookup_model import FeatureLookUpModel
 
 # Configure tracking uri
 mlflow.set_tracking_uri("databricks")
 mlflow.set_registry_uri("databricks-uc")
 
-config = ProjectConfig.from_yaml(config_path="project_config.yml")
+config = ProjectConfig.from_yaml(config_path="../project_config.yml")
 spark = SparkSession.builder.getOrCreate()
 tags_dict = {"git_sha": "abcd12345", "branch": "week2"}
 tags = Tags(**tags_dict)
 
-config = ProjectConfig.from_yaml(config_path="/Volumes/mlops_prod/house_prices/data/project_config.yml")
+#config = ProjectConfig.from_yaml(config_path="/Volumes/mlops_dev/house_prices/data/project_config.yml")
 
 
 # COMMAND ----------
@@ -58,10 +65,9 @@ X_test = test_set.drop("OverallQual", "GrLivArea", "GarageCars", config.target)
 
 
 # COMMAND ----------
-fe_model = FeatureLookUpModel(config=config)
 
 # Make predictions
-predictions = fe_model.predict(X_test)
+predictions = fe_model.load_latest_model_and_predict(X_test)
 
 # Display predictions
 logger.info(predictions)

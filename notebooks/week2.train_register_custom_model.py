@@ -1,4 +1,11 @@
 # Databricks notebook source
+# MAGIC %pip install /Volumes/mlops_dev/house_prices/package/house_price-0.0.1-py3-none-any.whl
+
+# COMMAND ----------
+
+# MAGIC %restart_python
+
+# COMMAND ----------
 from loguru import logger
 
 import mlflow
@@ -13,7 +20,7 @@ from house_price.models.custom_model import CustomModel
 mlflow.set_tracking_uri("databricks")
 mlflow.set_registry_uri("databricks-uc")
 
-# Profile called "course"
+# For different profiles, like "course":
 # mlflow.set_tracking_uri("databricks://course")
 # mlflow.set_registry_uri("databricks-uc://course")
 
@@ -23,9 +30,17 @@ tags = Tags(**{"git_sha": "abcd12345", "branch": "week2"})
 
 # COMMAND ----------
 # Initialize model with the config path
+
+'''
 custom_model = CustomModel(
     config=config, tags=tags, spark=spark, code_paths=["../dist/house_price-0.0.1-py3-none-any.whl"]
 )
+'''
+
+custom_model = CustomModel(
+    config=config, tags=tags, spark=spark, code_paths=["/Volumes/mlops_dev/house_prices/package/house_price-0.0.1-py3-none-any.whl"]
+)
+
 
 # COMMAND ----------
 custom_model.load_data()
