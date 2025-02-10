@@ -1,11 +1,9 @@
-from loguru import logger
-
 import yaml
+from loguru import logger
 from pyspark.sql import SparkSession
 
 from house_price.config import ProjectConfig
 from house_price.data_processor import DataProcessor
-
 
 config = ProjectConfig.from_yaml(config_path="../project_config.yml")
 
