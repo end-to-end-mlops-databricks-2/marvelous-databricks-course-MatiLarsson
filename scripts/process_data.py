@@ -1,33 +1,33 @@
-# Databricks notebook source
-import pandas as pd
 import yaml
-from databricks.connect import DatabricksSession
+from loguru import logger
+from pyspark.sql import SparkSession
 
-# from house_price.price_model import PriceModel
 from house_price.config import ProjectConfig
 from house_price.data_processor import DataProcessor
 
-spark = DatabricksSession.builder.profile("<profile-name>").getOrCreate()
+config = ProjectConfig.from_yaml(config_path="../project_config.yml")
 
-# Load configuration
-config = ProjectConfig.from_yaml(config_path="project_config.yml")
+logger.info("Configuration loaded:")
+logger.info(yaml.dump(config, default_flow_style=False))
 
-print("Configuration loaded:")
-print(yaml.dump(config, default_flow_style=False))
+# Load the house prices dataset
+spark = SparkSession.builder.getOrCreate()
 
-# COMMAND ----------
+df = spark.read.csv(
+    f"/Volumes/{config.catalog_name}/{config.schema_name}/data/data.csv", header=True, inferSchema=True
+).toPandas()
+
 # Initialize DataProcessor
-df = pd.read_csv("data/data.csv")
-data_processor = DataProcessor(df, config)
+data_processor = DataProcessor(df, config, spark)
 
 # Preprocess the data
 data_processor.preprocess()
 
-# COMMAND ----------
 # Split the data
 X_train, X_test = data_processor.split_data()
+logger.info("Training set shape: %s", X_train.shape)
+logger.info("Test set shape: %s", X_test.shape)
 
-print("Training set shape:", X_train.shape)
-print("Test set shape:", X_test.shape)
-
-data_processor.save_to_catalog(X_train, X_test, spark)
+# Save to catalog
+logger.info("Saving data to catalog")
+data_processor.save_to_catalog(X_train, X_test)

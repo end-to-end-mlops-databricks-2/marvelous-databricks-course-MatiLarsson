@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 import pandas as pd
 from pyspark.sql import SparkSession
@@ -9,9 +9,10 @@ from house_price.config import ProjectConfig
 
 
 class DataProcessor:
-    def __init__(self, pandas_df: pd.DataFrame, config: ProjectConfig):
+    def __init__(self, pandas_df: pd.DataFrame, config: ProjectConfig, spark: SparkSession):
         self.df = pandas_df  # Store the DataFrame as self.df
         self.config = config  # Store the configuration
+        self.spark = spark
 
     def preprocess(self):
         """Preprocess the DataFrame stored in self.df"""
@@ -21,7 +22,7 @@ class DataProcessor:
         self.df["GarageYrBlt"] = pd.to_numeric(self.df["GarageYrBlt"], errors="coerce")
         median_year = self.df["GarageYrBlt"].median()
         self.df["GarageYrBlt"].fillna(median_year, inplace=True)
-        current_year = datetime.now().year
+        current_year = datetime.datetime.now().year
 
         self.df["GarageAge"] = current_year - self.df["GarageYrBlt"]
         self.df.drop(columns=["GarageYrBlt"], inplace=True)
@@ -49,7 +50,7 @@ class DataProcessor:
         # Extract target and relevant features
         target = self.config.target
         relevant_columns = cat_features + num_features + [target] + ["Id"]
-        self.df = self.df[relevant_columns].copy()
+        self.df = self.df[relevant_columns]
         self.df["Id"] = self.df["Id"].astype("str")
 
     def split_data(self, test_size=0.2, random_state=42):
@@ -57,14 +58,14 @@ class DataProcessor:
         train_set, test_set = train_test_split(self.df, test_size=test_size, random_state=random_state)
         return train_set, test_set
 
-    def save_to_catalog(self, train_set: pd.DataFrame, test_set: pd.DataFrame, spark: SparkSession):
+    def save_to_catalog(self, train_set: pd.DataFrame, test_set: pd.DataFrame):
         """Save the train and test sets into Databricks tables."""
 
-        train_set_with_timestamp = spark.createDataFrame(train_set).withColumn(
+        train_set_with_timestamp = self.spark.createDataFrame(train_set).withColumn(
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )
 
-        test_set_with_timestamp = spark.createDataFrame(test_set).withColumn(
+        test_set_with_timestamp = self.spark.createDataFrame(test_set).withColumn(
             "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
         )
 
@@ -76,12 +77,13 @@ class DataProcessor:
             f"{self.config.catalog_name}.{self.config.schema_name}.test_set"
         )
 
-        spark.sql(
+    def enable_change_data_feed(self):
+        self.spark.sql(
             f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.train_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
 
-        spark.sql(
+        self.spark.sql(
             f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.test_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
