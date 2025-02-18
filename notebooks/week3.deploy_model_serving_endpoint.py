@@ -33,7 +33,7 @@ schema_name = config.schema_name
 # COMMAND ----------
 # Initialize feature store manager
 model_serving = ModelServing(
-    model_name=f"{catalog_name}.{schema_name}.house_price_model_basic", endpoint_name="house-prices-model-serving"
+    model_name=f"{catalog_name}.{schema_name}.house_prices_model_basic", endpoint_name="house-prices-model-serving"
 )
 
 # COMMAND ----------

@@ -1,5 +1,12 @@
 # Databricks notebook source
 
+# Databricks notebook source
+# MAGIC %pip install /Volumes/mlops_dev/house_prices/package/house_price-0.0.1-py3-none-any.whl
+
+# COMMAND ----------
+# MAGIC %restart_python
+
+# COMMAND ----------
 import hashlib
 
 import mlflow
