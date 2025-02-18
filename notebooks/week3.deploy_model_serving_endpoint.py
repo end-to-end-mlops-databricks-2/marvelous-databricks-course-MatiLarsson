@@ -29,11 +29,12 @@ os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 config = ProjectConfig.from_yaml(config_path="../project_config.yml")
 catalog_name = config.catalog_name
 schema_name = config.schema_name
+endpoint_name = "house-prices-model-serving"
 
 # COMMAND ----------
 # Initialize feature store manager
 model_serving = ModelServing(
-    model_name=f"{catalog_name}.{schema_name}.house_prices_model_basic", endpoint_name="house-prices-model-serving"
+    model_name=f"{catalog_name}.{schema_name}.house_prices_model_basic", endpoint_name=endpoint_name
 )
 
 # COMMAND ----------
@@ -103,11 +104,11 @@ Each dataframe record in the request body should be list of json with columns lo
 """
 
 
-def call_endpoint(self, record: List(Dict)):
+def call_endpoint(record: List[Dict]):
     """
     Calls the model serving endpoint with a given input record.
     """
-    serving_endpoint = f"https://{os.environ['DBR_HOST']}/serving-endpoints/{self.endpoint_name}/invocations"
+    serving_endpoint = f"https://{os.environ['DBR_HOST']}/serving-endpoints/{endpoint_name}/invocations"
 
     response = requests.post(
         serving_endpoint,
@@ -125,5 +126,7 @@ print(f"Response Text: {response_text}")
 # "load test"
 
 for i in range(len(dataframe_records)):
-    call_endpoint(dataframe_records[i])
+    status_code, response_text = call_endpoint(dataframe_records[i])
+    print(f"Response Status: {status_code}")
+    print(f"Response Text: {response_text}")
     time.sleep(0.2)

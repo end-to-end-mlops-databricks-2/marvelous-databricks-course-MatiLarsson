@@ -91,7 +91,7 @@ logger.info(dataframe_records[0])
 
 # COMMAND ----------
 # Call the endpoint with one sample record
-def call_endpoint(self, record: List(Dict)):
+def call_endpoint(record: List[Dict]):
     """
     Calls the model serving endpoint with a given input record.
     """
@@ -113,5 +113,7 @@ print(f"Response Text: {response_text}")
 # "load test"
 
 for i in range(len(dataframe_records)):
-    call_endpoint(dataframe_records[i])
+    status_code, response_text = call_endpoint(dataframe_records[i])
+    print(f"Response Status: {status_code}")
+    print(f"Response Text: {response_text}")
     time.sleep(0.2)
