@@ -8,6 +8,11 @@
 
 # COMMAND ----------
 import hashlib
+import os
+import time
+from typing import Dict, List
+
+import requests
 
 import mlflow
 from databricks.sdk import WorkspaceClient
@@ -35,8 +40,9 @@ tags = Tags(**{"git_sha": "abcd12345", "branch": "week3"})
 # COMMAND ----------
 # Train & register model A with the config path
 basic_model_a = BasicModel(config=config, tags=tags, spark=spark)
-basic_model_a.paramaters = config.parameters_a
+basic_model_a.parameters = config.parameters_a
 basic_model_a.model_name = f"{catalog_name}.{schema_name}.house_prices_model_basic_A"
+basic_model_a.experiment_name = config.experiment_name_a
 basic_model_a.load_data()
 basic_model_a.prepare_features()
 basic_model_a.train()
@@ -47,8 +53,9 @@ model_A = mlflow.sklearn.load_model(f"models:/{basic_model_a.model_name}@latest-
 # COMMAND ----------
 # Train & register model B with the config path
 basic_model_b = BasicModel(config=config, tags=tags, spark=spark)
-basic_model_b.paramaters = config.parameters_b
+basic_model_b.parameters = config.parameters_b
 basic_model_b.model_name = f"{catalog_name}.{schema_name}.house_prices_model_basic_B"
+basic_model_a.experiment_name = config.experiment_name_b
 basic_model_b.load_data()
 basic_model_b.prepare_features()
 basic_model_b.train()
@@ -118,9 +125,40 @@ served_entities = [
     )
 ]
 
+endpoint_name = "house-price-model-ab"
+
 workspace.serving_endpoints.create(
-    name="house-price-model-ab",
+    name=endpoint_name,
     config=EndpointCoreConfigInput(
         served_entities=served_entities,
     ),
 )
+
+# COMMAND ----------
+# Call the endpoint with one sample record
+def call_endpoint(record: List[Dict]):
+    """
+    Calls the model serving endpoint with a given input record.
+    """
+    serving_endpoint = f"https://{os.environ['DBR_HOST']}/serving-endpoints/{endpoint_name}/invocations"
+
+    response = requests.post(
+        serving_endpoint,
+        headers={"Authorization": f"Bearer {os.environ['DBR_TOKEN']}"},
+        json={"dataframe_records": record},
+    )
+    return response.status_code, response.text
+
+
+status_code, response_text = call_endpoint(X_test[0])
+print(f"Response Status: {status_code}")
+print(f"Response Text: {response_text}")
+
+# COMMAND ----------
+# "load test"
+
+for i in range(len(X_test)):
+    status_code, response_text = call_endpoint(X_test[i])
+    print(f"Response Status: {status_code}")
+    print(f"Response Text: {response_text}")
+    time.sleep(0.2)
