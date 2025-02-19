@@ -16,6 +16,8 @@ class ProjectConfig(BaseModel):
     experiment_name_basic: Optional[str]
     experiment_name_custom: Optional[str]
     experiment_name_fe: Optional[str]
+    experiment_name_a: Optional[str]
+    experiment_name_b: Optional[str]
 
     @classmethod
     def from_yaml(cls, config_path: str):
