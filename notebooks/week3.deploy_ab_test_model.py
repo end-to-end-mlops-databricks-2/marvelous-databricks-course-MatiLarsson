@@ -21,6 +21,7 @@ from databricks.sdk.service.serving import (
     ServedEntityInput,
 )
 from mlflow.models import infer_signature
+from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 
 from house_price.config import ProjectConfig, Tags
@@ -35,7 +36,11 @@ config = ProjectConfig.from_yaml(config_path="../project_config.yml")
 catalog_name = config.catalog_name
 schema_name = config.schema_name
 spark = SparkSession.builder.getOrCreate()
+dbutils = DBUtils(spark)
 tags = Tags(**{"git_sha": "abcd12345", "branch": "week3"})
+
+os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 
 # COMMAND ----------
 # Train & register model A with the config path
