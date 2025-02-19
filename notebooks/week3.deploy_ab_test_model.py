@@ -149,16 +149,20 @@ def call_endpoint(record: List[Dict]):
     )
     return response.status_code, response.text
 
+# COMMAND ----------
 
-status_code, response_text = call_endpoint(X_test[0])
+sampled_records = X_test.to_dict(orient="records")
+dataframe_records = [[record] for record in sampled_records]
+
+status_code, response_text = call_endpoint(dataframe_records)
 print(f"Response Status: {status_code}")
 print(f"Response Text: {response_text}")
 
 # COMMAND ----------
 # "load test"
 
-for i in range(len(X_test)):
-    status_code, response_text = call_endpoint(X_test[i])
+for i in range(len(dataframe_records)):
+    status_code, response_text = call_endpoint(dataframe_records[i])
     print(f"Response Status: {status_code}")
     print(f"Response Text: {response_text}")
     time.sleep(0.2)
