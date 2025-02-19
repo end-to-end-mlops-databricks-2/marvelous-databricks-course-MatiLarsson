@@ -120,6 +120,9 @@ model_version = mlflow.register_model(
 )
 
 # COMMAND ----------
+endpoint_name = "house-price-model-ab"
+
+# COMMAND ----------
 workspace = WorkspaceClient()
 served_entities = [
     ServedEntityInput(
@@ -129,8 +132,6 @@ served_entities = [
         entity_version=model_version.version,
     )
 ]
-
-endpoint_name = "house-price-model-ab"
 
 workspace.serving_endpoints.create(
     name=endpoint_name,
