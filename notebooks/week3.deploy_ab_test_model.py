@@ -159,7 +159,7 @@ def call_endpoint(record: List[Dict]):
 
 test_records = X_test.to_dict(orient="records")
 
-status_code, response_text = call_endpoint(test_records)
+status_code, response_text = call_endpoint([test_records[0]])
 print(f"Response Status: {status_code}")
 print(f"Response Text: {response_text}")
 
@@ -167,7 +167,7 @@ print(f"Response Text: {response_text}")
 # "load test"
 
 for i in range(len(test_records)):
-    status_code, response_text = call_endpoint(test_records[i])
+    status_code, response_text = call_endpoint([test_records[i]])
     print(f"Response Status: {status_code}")
     print(f"Response Text: {response_text}")
     time.sleep(0.2)
