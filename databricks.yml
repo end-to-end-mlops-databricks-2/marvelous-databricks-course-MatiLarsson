@@ -29,7 +29,7 @@ resources:
       name: house-price-workflow-test-demo
       schedule:
         quartz_cron_expression: "0 0 6 ? * MON"
-        timezone_id: "Europe/Amsterdam"
+        timezone_id: "America/Buenos_Aires"
         pause_status: ${var.schedule_pause_status}
       tags:
         project_name: "house-price"
@@ -38,8 +38,8 @@ resources:
           new_cluster:
             spark_version: "15.4.x-scala2.12"
             data_security_mode: "SINGLE_USER"
-            node_type_id: "r3.xlarge"
-            driver_node_type_id: "r3.xlarge"
+            node_type_id: "Standard_DS3_v2"
+            driver_node_type_id: "Standard_DS3_v2"
             autoscale:
               min_workers: 1
               max_workers: 1
