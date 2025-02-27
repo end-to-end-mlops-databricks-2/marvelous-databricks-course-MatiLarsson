@@ -9,7 +9,7 @@ acc:
 dev:
   catalog_name: mlops_dev
   schema_name: house_prices
-  pipeline_id: x
+  pipeline_id: d184107b-8d8d-4912-a72c-1c93ae529a3e
 
 
 experiment_name_basic: /Shared/house-prices-basic
