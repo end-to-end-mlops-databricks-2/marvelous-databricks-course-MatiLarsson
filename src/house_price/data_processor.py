@@ -1,5 +1,7 @@
 import datetime
+import time
 
+import numpy as np
 import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
@@ -87,3 +89,61 @@ class DataProcessor:
             f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.test_set "
             "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
+
+
+def generate_synthetic_data(df, num_rows=10):
+    """Generates synthetic data based on the distribution of the input DataFrame."""
+    synthetic_data = pd.DataFrame()
+
+    for column in df.columns:
+        if column == "Id":
+            continue
+
+        if pd.api.types.is_numeric_dtype(df[column]):
+            if column in {"YearBuilt", "YearRemodAdd"}:  # Handle year-based columns separately
+                synthetic_data[column] = np.random.randint(df[column].min(), df[column].max() + 1, num_rows)
+            else:
+                synthetic_data[column] = np.random.normal(df[column].mean(), df[column].std(), num_rows)
+
+        elif pd.api.types.is_categorical_dtype(df[column]) or pd.api.types.is_object_dtype(df[column]):
+            synthetic_data[column] = np.random.choice(
+                df[column].unique(), num_rows, p=df[column].value_counts(normalize=True)
+            )
+
+        elif pd.api.types.is_datetime64_any_dtype(df[column]):
+            min_date, max_date = df[column].min(), df[column].max()
+            synthetic_data[column] = pd.to_datetime(
+                np.random.randint(min_date.value, max_date.value, num_rows)
+                if min_date < max_date
+                else [min_date] * num_rows
+            )
+
+        else:
+            synthetic_data[column] = np.random.choice(df[column], num_rows)
+
+    # Convert relevant numeric columns to integers
+    int_columns = {
+        "LotArea",
+        "OverallQual",
+        "OverallCond",
+        "GarageCars",
+        "SalePrice",
+        "YearBuilt",
+        "YearRemodAdd",
+        "TotalBsmtSF",
+        "GrLivArea",
+    }
+
+    for col in int_columns.intersection(df.columns):
+        synthetic_data[col] = synthetic_data[col].astype(np.int32)
+
+    synthetic_data["LotFrontage"] = pd.to_numeric(synthetic_data["LotFrontage"], errors="coerce")
+    synthetic_data["MasVnrArea"] = pd.to_numeric(synthetic_data["MasVnrArea"], errors="coerce")
+    synthetic_data["GarageYrBlt"] = pd.to_numeric(synthetic_data["GarageYrBlt"], errors="coerce")
+    synthetic_data["LotFrontage"] = synthetic_data["LotFrontage"].astype(np.float64)
+    synthetic_data["MasVnrArea"] = synthetic_data["MasVnrArea"].astype(np.float64)
+
+    timestamp_base = int(time.time() * 1000)
+    synthetic_data["Id"] = [str(timestamp_base + i) for i in range(num_rows)]
+
+    return synthetic_data

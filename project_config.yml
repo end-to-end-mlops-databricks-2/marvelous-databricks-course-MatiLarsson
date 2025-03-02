@@ -1,5 +1,17 @@
-catalog_name: mlops_dev
-schema_name: house_prices
+prd:
+  catalog_name: mlops_prod
+  schema_name: house_prices
+  pipeline_id: x
+acc:
+  catalog_name: mlops_acc
+  schema_name: house_prices
+  pipeline_id: x
+dev:
+  catalog_name: mlops_dev
+  schema_name: house_prices
+  pipeline_id: d184107b-8d8d-4912-a72c-1c93ae529a3e
+
+
 experiment_name_basic: /Shared/house-prices-basic
 experiment_name_custom: /Shared/house-prices-custom
 experiment_name_fe: /Shared/house-prices-fe
