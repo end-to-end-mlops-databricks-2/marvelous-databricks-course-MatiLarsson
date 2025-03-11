@@ -91,7 +91,7 @@ class DataProcessor:
         )
 
 
-def generate_synthetic_data(df, num_rows=10):
+def generate_synthetic_data(df, drift: False, num_rows=10):
     """Generates synthetic data based on the distribution of the input DataFrame."""
     synthetic_data = pd.DataFrame()
 
@@ -104,6 +104,9 @@ def generate_synthetic_data(df, num_rows=10):
                 synthetic_data[column] = np.random.randint(df[column].min(), df[column].max() + 1, num_rows)
             else:
                 synthetic_data[column] = np.random.normal(df[column].mean(), df[column].std(), num_rows)
+
+                if column == "SalePrice":
+                    synthetic_data[column] = np.maximum(0, synthetic_data[column])  # Ensure values are non-negative
 
         elif pd.api.types.is_categorical_dtype(df[column]) or pd.api.types.is_object_dtype(df[column]):
             synthetic_data[column] = np.random.choice(
@@ -137,13 +140,25 @@ def generate_synthetic_data(df, num_rows=10):
     for col in int_columns.intersection(df.columns):
         synthetic_data[col] = synthetic_data[col].astype(np.int32)
 
-    synthetic_data["LotFrontage"] = pd.to_numeric(synthetic_data["LotFrontage"], errors="coerce")
-    synthetic_data["MasVnrArea"] = pd.to_numeric(synthetic_data["MasVnrArea"], errors="coerce")
-    synthetic_data["GarageYrBlt"] = pd.to_numeric(synthetic_data["GarageYrBlt"], errors="coerce")
-    synthetic_data["LotFrontage"] = synthetic_data["LotFrontage"].astype(np.float64)
-    synthetic_data["MasVnrArea"] = synthetic_data["MasVnrArea"].astype(np.float64)
+    # Only process columns if they exist in synthetic_data
+    for col in ["LotFrontage", "MasVnrArea", "GarageYrBlt"]:
+        if col in synthetic_data.columns:
+            synthetic_data[col] = pd.to_numeric(synthetic_data[col], errors="coerce")
+            synthetic_data[col] = synthetic_data[col].astype(np.float64)
 
     timestamp_base = int(time.time() * 1000)
     synthetic_data["Id"] = [str(timestamp_base + i) for i in range(num_rows)]
+
+    if drift:
+        # Skew the top features to introduce drift
+        top_features = ["OverallQual", "GrLivArea"]  # Select top 2 features
+        for feature in top_features:
+            if feature in synthetic_data.columns:
+                synthetic_data[feature] = synthetic_data[feature] * 2
+
+        # Set YearBuilt to within the last 2 years
+        current_year = pd.Timestamp.now().year
+        if "YearBuilt" in synthetic_data.columns:
+            synthetic_data["YearBuilt"] = np.random.randint(current_year - 2, current_year + 1, num_rows)
 
     return synthetic_data

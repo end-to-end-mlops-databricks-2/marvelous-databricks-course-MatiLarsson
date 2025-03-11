@@ -5,6 +5,9 @@
 bundle:
   name: marvelous-databricks-course-MatiLarsson
 
+include:
+  - bundle_monitoring.yml
+
 artifacts:
   default:
     type: whl
