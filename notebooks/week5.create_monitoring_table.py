@@ -22,7 +22,7 @@ from house_price.config import ProjectConfig
 spark = SparkSession.builder.getOrCreate()
 
 # Load configuration
-config = ProjectConfig.from_yaml(config_path="project_config.yml", env="dev")
+config = ProjectConfig.from_yaml(config_path="../project_config.yml", env="dev")
 spark = SparkSession.builder.getOrCreate()
 
 train_set = spark.table(f"{config.catalog_name}.{config.schema_name}.train_set").toPandas()
