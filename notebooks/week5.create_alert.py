@@ -1,4 +1,10 @@
 # Databricks notebook source
+# MAGIC %pip install /Volumes/mlops_dev/house_prices/package/house_price-0.0.1-py3-none-any.whl
+
+# COMMAND ----------
+# MAGIC %restart_python
+
+# COMMAND ----------
 # MAGIC %md
 # MAGIC ### Create a query that checks the percentage of MAE being higher than 7000
 
