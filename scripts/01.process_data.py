@@ -43,7 +43,7 @@ df = spark.read.csv(
 # Generate synthetic data
 ### This is mimicking a new data arrival. In real world, this would be a new batch of data.
 # df is passed to infer schema
-synthetic_df = generate_synthetic_data(df, num_rows=100)
+synthetic_df = generate_synthetic_data(df, drift=False, num_rows=100)
 logger.info("Synthetic data generated.")
 
 # Initialize DataProcessor
